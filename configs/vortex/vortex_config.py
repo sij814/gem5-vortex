@@ -30,7 +30,7 @@ system.mem_ctrl.dram = DDR3_1600_8x8()
 system.mem_ctrl.dram.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 
-system.gpu = Vortex(
+system.gpu = VortexVADD(
     pio_addr=0x0200000000,
     int_gpu=1,
     num_clusters=1,

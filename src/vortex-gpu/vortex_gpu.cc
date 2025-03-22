@@ -227,7 +227,6 @@ Vortex::Vortex(const VortexParams &p)
 {
     DPRINTF(Vortex, "Creating Vortex\n");
 
-    /*
 
     vortex::Arch arch(numThreads, numWarps, numCores);
 
@@ -249,7 +248,7 @@ Vortex::Vortex(const VortexParams &p)
   #if (XLEN == 64)
     processor.dcr_write(VX_DCR_BASE_STARTUP_ADDR1, startup_addr >> 32);
   #endif
-	processor.dcr_write(VX_DCR_BASE_MPM_CLASS, 0);
+	  processor.dcr_write(VX_DCR_BASE_MPM_CLASS, 0);
 
     DPRINTF(Vortex, "DCR Setup\n");
 
@@ -260,10 +259,9 @@ Vortex::Vortex(const VortexParams &p)
     // read exitcode from @MPM.1
     //ram.read(&exitcode, (IO_MPM_ADDR + 8), 4);
 
-    */
 
     // run vecaddx
-    vecaddx();
+    //vecaddx();
 }
 
 void
@@ -334,7 +332,7 @@ int Vortex::vortex_read(vx_device_h hdevice, uint32_t addr, uint32_t* value)
 
 int Vortex::vortex_write(vx_device_h hdevice, uint32_t addr, uint32_t value) 
 {
-    DPRINTF(Vortex, "write()\n");
+    DPRINTF(Vortex, "write() %x\n", addr);
 
     vx_dcr_write(hdevice, addr, value);
 

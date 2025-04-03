@@ -9,6 +9,8 @@
 #include "mem/packet_access.hh"
 #include "vortex/runtime/include/vortex.h"
 #include "vortex/build/hw/VX_config.h"
+#include "opae_simx.h"
+//#include "opae_sim.h"
 
 namespace gem5
 {
@@ -39,6 +41,7 @@ class Vortex : public PioDevice
 
     // Put wrapper functions here
     protected:
+        int vortex_start();
         int vortex_read(vx_device_h hdevice, uint32_t addr, uint32_t* value);
         int vortex_write(vx_device_h hdevice, uint32_t addr, uint32_t value);
     /*
@@ -55,7 +58,7 @@ class Vortex : public PioDevice
         const uint32_t numWarps;
         const uint32_t numThreads;
 
-        vx_device_h device;
+        vortex::opae_simx* sim;
 };
 
 } // namespace gem5

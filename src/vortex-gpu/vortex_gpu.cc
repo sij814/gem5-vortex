@@ -9,6 +9,9 @@
 #include <util.h>
 #include "core.h"
 #include "VX_types.h"
+#include "VX_config.h"
+#include "opae_simx.h"
+//#include "opae_sim.h"
 
 ///////////////////////
 #include <iostream>
@@ -32,60 +35,24 @@ Vortex::Vortex(const VortexParams &p)
 {
     DPRINTF(Vortex, "Creating Vortex\n");
 
-    vortex::Arch arch(numThreads, numWarps, numCores);
-
-    // create memory module
-    vortex::RAM ram(0, MEM_PAGE_SIZE);
-
-    // create processor
-    vortex::Processor processor(arch);
-
-    DPRINTF(Vortex, "Created Processor\n");
-
-    // attach memory module
-    processor.attach_ram(&ram);
-
-	  // setup base DCRs
-    const uint64_t startup_addr(STARTUP_ADDR);
-    processor.dcr_write(VX_DCR_BASE_STARTUP_ADDR0, startup_addr & 0xffffffff);
-  #if (XLEN == 64)
-    processor.dcr_write(VX_DCR_BASE_STARTUP_ADDR1, startup_addr >> 32);
-  #endif
-	  processor.dcr_write(VX_DCR_BASE_MPM_CLASS, 0);
-
-    DPRINTF(Vortex, "DCR Setup\n");
-
-    // processor.run();
-
-<<<<<<< HEAD
-    //DPRINTF(Vortex, "Vortex Running\n");
-
-    // read exitcode from @MPM.1
-    //ram.read(&exitcode, (IO_MPM_ADDR + 8), 4);
-
-
-    // run vecaddx
-    //vecaddx();
-=======
-    // DPRINTF(Vortex, "Vortex Running\n");
->>>>>>> 49d808c0f67033b2e027a72945a7df87e9e771ac
+    sim = new vortex::opae_simx();
 }
 
 void
 Vortex::init()
 {
+    DPRINTF(Vortex, "Vortex Initialized\n");
+
     PioDevice::init();
+    sim->init();
     schedule(tickEvent, 0);
 }
 
 void Vortex::processTick() 
 {
-    if (curTick() % 10000000 == 0) {
+    if (curTick() % 100000000 == 0) {
         DPRINTF(Vortex, "Vortex tick = %d\n", SimPlatform::instance().cycles());
     }
-
-    // simulate Vortex tick
-    SimPlatform::instance().tick();
 
     // simulate Gem5 tick
     schedule(tickEvent, curTick() + 1);
@@ -102,12 +69,16 @@ void Vortex::unserialize(CheckpointIn &cp)
 Tick Vortex::read(PacketPtr pkt) 
 {
     const Addr addr(pkt->getAddr() - pioAddr);
-    uint32_t* value;
-    vortex_read(device, addr, value);
+    uint64_t* value = (uint64_t*)malloc(sizeof(uint64_t));
+
+    DPRINTF(Vortex, "read() %x\n", addr);
+    sim->read_mmio64(0, addr, value);
 
     // example read
     pkt->setLE<uint32_t>(*value);
     pkt->makeResponse();
+
+    free(value);
 
     return 0;
 }
@@ -115,10 +86,16 @@ Tick Vortex::read(PacketPtr pkt)
 Tick Vortex::write(PacketPtr pkt) 
 {
     const Addr addr(pkt->getAddr() - pioAddr);
-    vortex_write(device, addr, pkt->getLE<uint32_t>());
+    DPRINTF(Vortex, "write() %x\n", addr);
+
+    sim->write_mmio64(0, addr, pkt->getLE<uint32_t>());
 
     // example write
     pkt->makeAtomicResponse();
+
+    if (addr == 0) {
+        vortex_start();
+    }
 
     return 0;
 }
@@ -128,9 +105,16 @@ AddrRangeList Vortex::getAddrRanges() const
     return AddrRangeList({ RangeSize(pioAddr, pioAddr + 0xFFFF) });
 }
 
+int Vortex::vortex_start() {
+    DPRINTF(Vortex, "vortex start()\n");
+
+    sim->start();
+    return 0;
+}
+
 int Vortex::vortex_read(vx_device_h hdevice, uint32_t addr, uint32_t* value) 
 {
-    DPRINTF(Vortex, "read()\n");
+    DPRINTF(Vortex, "vortex read()\n");
 
     vx_dcr_read(hdevice, addr, value);
 
@@ -139,7 +123,7 @@ int Vortex::vortex_read(vx_device_h hdevice, uint32_t addr, uint32_t* value)
 
 int Vortex::vortex_write(vx_device_h hdevice, uint32_t addr, uint32_t value) 
 {
-    DPRINTF(Vortex, "write() %x\n", addr);
+    DPRINTF(Vortex, "vortex write() %x\n", addr);
 
     vx_dcr_write(hdevice, addr, value);
 

@@ -31,6 +31,7 @@ Vortex::Vortex(const VortexParams &p)
     numCores(p.num_cores),
     numWarps(p.num_warps),
     numThreads(p.num_threads),
+    running(0),
     tickEvent([this]{processTick();}, name())
 {
     DPRINTF(Vortex, "Creating Vortex\n");
@@ -109,6 +110,9 @@ int Vortex::vortex_start() {
     DPRINTF(Vortex, "vortex start()\n");
 
     sim->start();
+
+    DPRINTF(Vortex, "running = %d\n", running);
+
     return 0;
 }
 

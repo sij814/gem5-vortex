@@ -59,6 +59,9 @@ class Vortex : public PioDevice
         const uint32_t numThreads;
 
         vortex::opae_simx* sim;
+    
+    private:
+        uint32_t running;
 };
 
 } // namespace gem5

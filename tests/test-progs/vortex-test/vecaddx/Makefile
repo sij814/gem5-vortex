@@ -1,18 +1,18 @@
 # Toolchain
 CXX := arm-linux-gnueabihf-g++
 CFLAGS := -Wall -Wextra -O2 -std=c++11
-VORTEX_PATH := $(abspath ../../../../ext/vortex/)
+VORTEX_PATH := $(abspath ../../../../ext/vortex)
 
-INCLUDES := -I$(VORTEX_PATH)/runtime/include
-INCLUDES += -I$(VORTEX_PATH)/kernel/include
-INCLUDES += -I$(VORTEX_PATH)/build/hw
-INCLUDES += -I$(VORTEX_PATH)/runtime
+INCLUDES := -I$(VORTEX_PATH)/runtime/include \
+			-I$(VORTEX_PATH)/kernel/include \
+			-I$(VORTEX_PATH)/build/hw \
+			-I$(VORTEX_PATH)/runtime
 
-PROJECT_ROOT := $(abspath ../../../../ext/vortex/build)
-LINK_PATHS := -L$(PROJECT_ROOT)/runtime \
-              -L$(PROJECT_ROOT)/kernel \
+BUILD_ROOT := $(VORTEX_PATH)/build
+LINK_PATHS := -L$(BUILD_ROOT)/runtime \
+              -L$(BUILD_ROOT)/kernel \
 
-LIBS := -L$(LINK_PATHS) -lvortex -lsimx -lvortex-simx -lopae-c-sim -lvortex-opae
+LIBS := -L$(LINK_PATHS) -lvortex
 
 # Source files
 SRCS := main.cpp

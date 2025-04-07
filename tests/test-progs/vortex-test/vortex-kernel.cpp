@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../../../ext/vortex/runtime/include/vortex.h"
 //#include "../../../ext/vortex/runtime/common/common.h"
-#define ACCELERATOR_BASE 0x080000000
+#define ACCELERATOR_BASE 0x80000000
 
 int main()
 {

@@ -8,7 +8,8 @@ system.clk_domain.clock = '1GHz'
 system.clk_domain.voltage_domain = VoltageDomain()
 
 system.mem_mode = 'timing'
-system.mem_ranges = [AddrRange('2048MB'), AddrRange(Addr("2048MB"), size="2048MB")]
+system.mem_ranges = [AddrRange('2048MB'), 
+                    AddrRange(Addr("2048MB"), size="4096MB")]
 #system.mem_ranges = [AddrRange('512MB')]
 
 system.cpu = ArmTimingSimpleCPU()
@@ -31,7 +32,7 @@ system.mem_ctrl.dram.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 
 system.gpu = Vortex(
-    pio_addr=0x080000000,
+    pio_addr=0x80000000,
     int_gpu=1,
     num_clusters=1,
     num_cores=1,
@@ -45,7 +46,8 @@ system.gpu.pio = system.membus.mem_side_ports
 #binary = 'tests/test-progs/hello/bin/x86/linux/hello'
 #binary = 'tests/test-progs/vortex/a.out'
 #binary = 'tests/test-progs/vortex/nomali_test0'
-binary = 'tests/test-progs/vortex-test/vortex_arm32'
+#binary = 'tests/test-progs/vortex-test/vortex_arm32'
+binary = 'tests/test-progs/vortex-test/vecaddx/app.elf'
 
 # for gem5 V21 and beyond
 system.workload = SEWorkload.init_compatible(binary)
@@ -58,12 +60,13 @@ system.cpu.createThreads()
 root = Root(full_system=False, system=system)
 
 m5.instantiate()
-system.cpu.workload[0].map(
-    0x00000000, 0x00000000, 0xFFFF
-)
-system.cpu.workload[0].map(
-    0x080000000, 0x080000000, 0xFFFF
-)
+#system.cpu.workload[0].map(
+#    0x00000000, 0x00000000, 0xFFFF
+#)
+
+#system.cpu.workload[0].map(
+#    0x80000000, 0x80000000, 0xFFFFFFF
+#)
 
 print("Beginning simulation!")
 exit_event = m5.simulate()

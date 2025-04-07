@@ -10,9 +10,9 @@ INCLUDES := -I$(VORTEX_PATH)/runtime/include \
 
 BUILD_ROOT := $(VORTEX_PATH)/build
 LINK_PATHS := -L$(BUILD_ROOT)/runtime \
-              -L$(BUILD_ROOT)/kernel \
+              #-L$(BUILD_ROOT)/kernel \
 
-LIBS := -L$(LINK_PATHS) -lvortex
+LIBS := -lvortexarm
 
 # Source files
 SRCS := main.cpp
@@ -24,8 +24,7 @@ TARGET := app.elf
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	@echo "Linking with libraries from: $(LINK_PATH)"
-	$(CXX) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
+	$(CXX) $(CFLAGS) $(INCLUDES) -o $@ $^ $(LINK_PATHS) $(LIBS)
 
 %.o: %.cpp common.h
 	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@

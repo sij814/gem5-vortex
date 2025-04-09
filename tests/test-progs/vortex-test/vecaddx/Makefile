@@ -1,6 +1,6 @@
 # Toolchain
 CXX := arm-linux-gnueabihf-g++
-CFLAGS := -Wall -Wextra -O2 -std=c++11
+CFLAGS := -Wall -Wextra -O2 -std=c++17
 VORTEX_PATH := $(abspath ../../../../ext/vortex)
 
 INCLUDES := -I$(VORTEX_PATH)/runtime/include \

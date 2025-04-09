@@ -64,9 +64,9 @@ m5.instantiate()
 #    0x00000000, 0x00000000, 0xFFFF
 #)
 
-#system.cpu.workload[0].map(
-#    0x80000000, 0x80000000, 0xFFFFFFF
-#)
+system.cpu.workload[0].map(
+    0x80000000, 0x80000000, 0xFFFF
+)
 
 print("Beginning simulation!")
 exit_event = m5.simulate()

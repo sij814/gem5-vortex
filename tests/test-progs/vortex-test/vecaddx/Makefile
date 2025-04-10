@@ -12,7 +12,7 @@ BUILD_ROOT := $(VORTEX_PATH)/build
 LINK_PATHS := -L$(BUILD_ROOT)/runtime \
               #-L$(BUILD_ROOT)/kernel \
 
-LIBS := -lvortexarm
+LIBS := -lvortex
 
 # Source files
 SRCS := main.cpp

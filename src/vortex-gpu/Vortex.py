@@ -1,6 +1,5 @@
+from m5.objects.Device import PioDevice
 from m5.params import *
-from m5.objects.Gic import *
-from m5.objects.Device import BasicPioDevice
 
 class Vortex(PioDevice):
     type = 'Vortex'

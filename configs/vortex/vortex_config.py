@@ -9,7 +9,7 @@ system.clk_domain.voltage_domain = VoltageDomain()
 
 system.mem_mode = 'timing'
 system.mem_ranges = [AddrRange('2048MB'), 
-                    AddrRange(Addr("2048MB"), size="4096MB")]
+                    AddrRange(Addr("2048MB"), size="8192MB")]
 #system.mem_ranges = [AddrRange('512MB')]
 
 system.cpu = ArmTimingSimpleCPU()
@@ -46,8 +46,8 @@ system.gpu.pio = system.membus.mem_side_ports
 #binary = 'tests/test-progs/hello/bin/x86/linux/hello'
 #binary = 'tests/test-progs/vortex/a.out'
 #binary = 'tests/test-progs/vortex/nomali_test0'
-#binary = 'tests/test-progs/vortex-test/vortex_arm32'
-binary = 'tests/test-progs/vortex-test/vecaddx/app.elf'
+binary = 'tests/test-progs/vortex-test/vortex_arm32'
+#binary = 'ext/vortex/build/tests/kernel/hello/hello.elf'
 
 # for gem5 V21 and beyond
 system.workload = SEWorkload.init_compatible(binary)

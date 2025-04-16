@@ -12,7 +12,7 @@
 
 #include <vector>
 
-#define ACCELERATOR_BASE 0x80000000
+#define ACCELERATOR_BASE 0x20000000
 
 const char* fileExtension(const char* filepath) {
     const char *ext = strrchr(filepath, '.');
@@ -20,17 +20,6 @@ const char* fileExtension(const char* filepath) {
       return "";
     return ext + 1;
 }
-
-/*
-void write(const void* data, uint64_t addr, uint64_t size) {
-    const uint8_t* d = (const uint8_t*)data;
-    uint8_t *dest;
-    for (uint64_t i = 0; i < size; i++) {
-        dest = (uint8_t *)(addr + i);
-        *dest = d[i];
-    }
-}
-*/
 
 void loadBinImage(const char* filename, uint64_t destination) {
     std::ifstream ifs(filename);
@@ -47,14 +36,15 @@ void loadBinImage(const char* filename, uint64_t destination) {
 
     void* destPtr = reinterpret_cast<void*>(destination);
   
-    // write to GPU addr range
+    // copy to GPU addr range
     std::memcpy(destPtr, content.data(), size);
-    //write(content.data(), destination, size);
 }
 
 int main()
 {
-    uint64_t startup_addr = STARTUP_ADDR;
+    uint64_t startup_addr = (uint64_t)(ACCELERATOR_BASE) + (uint64_t)(STARTUP_ADDR);
+
+    std::cout << "startup_addr = " << startup_addr << std::endl;
 
     const char* program = "/home/sij814/gem5-vortex/ext/vortex/build/tests/kernel/conform/conform.bin";
     std::string program_ext(fileExtension(program));
@@ -70,11 +60,30 @@ int main()
         return -1;
     }
 
-    uint64_t *gpu = (uint64_t *)(ACCELERATOR_BASE + 40);
-    std::cout << "reading: " << *gpu << std::endl;
+    uint8_t *gpu = (uint8_t *)(ACCELERATOR_BASE + 40);
+    //std::cout << "reading: " << *gpu << std::endl;
 
-    //*gpu = 3;
+    *gpu = 3;
     //std::cout << "new value: " << *gpu << std::endl;
 
+    /*
+    // extra kernel run
+    program = "/home/sij814/gem5-vortex/ext/vortex/build/tests/kernel/hello/hello.bin";
+    program_ext = fileExtension(program);
+
+    if (program_ext == "bin" || program_ext == "vxbin") {
+        loadBinImage(program, startup_addr);
+        std::cout << "bin file detected" << std::endl;
+    } else if (program_ext == "hex") {
+        //ram_->loadHexImage(program);
+        std::cout << "hex file detected" << std::endl;
+    } else {
+        std::cout << "*** error: only *.bin or *.hex images supported." << std::endl;
+        return -1;
+    }
+
+    std::cout << "reading: " << *gpu << std::endl;
+
     return 0;
+    */
 }

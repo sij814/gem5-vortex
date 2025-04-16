@@ -69,19 +69,35 @@ void Vortex::unserialize(CheckpointIn &cp)
 
 Tick Vortex::read(PacketPtr pkt) 
 {
-    const Addr addr(pkt->getAddr());
-    uint64_t value = 0;
+    const Addr addr(pkt->getAddr() - pioAddr);
 
     DPRINTF(Vortex, "read() %x\n", addr);
-    sim->read_mmio64(0, addr, &value);
+
+    uint64_t data;
+    uint64_t size = pkt->getSize();
+    sim->read_mmio64(0, addr, &data, size);
+
+    switch (size) {
+        case sizeof(uint64_t):
+            pkt->setLE<uint64_t>(data);
+            break;
+        case sizeof(uint32_t):
+            pkt->setLE<uint32_t>(data);
+            break;
+        case sizeof(uint16_t):
+            pkt->setLE<uint16_t>(data);
+            break;
+        case sizeof(uint8_t):
+            pkt->setLE<uint8_t>(data);
+            break;
+    }
 
     // example read
-    pkt->setLE<uint64_t>(value);
     pkt->makeResponse();
 
-    if (addr - pioAddr == 40 && ((value & 3) == 3)) {
-        vortex_start();
-    }
+    //if (addr == 40 && ((data & 3) == 3)) {
+    //    vortex_start();
+    //}
 
     DPRINTF(Vortex, "read() done for %x\n", addr);
 
@@ -90,32 +106,33 @@ Tick Vortex::read(PacketPtr pkt)
 
 Tick Vortex::write(PacketPtr pkt) 
 {
-    const Addr addr(pkt->getAddr());
+    const Addr addr(pkt->getAddr() - pioAddr);
     uint64_t data;
-    switch (pkt->getSize()) {
+    uint64_t size = pkt->getSize();
+    switch (size) {
         case sizeof(uint64_t):
-        data = pkt->getLE<uint64_t>();
-        break;
+            data = pkt->getLE<uint64_t>();
+            break;
         case sizeof(uint32_t):
-        data = pkt->getLE<uint32_t>();
-        break;
+            data = pkt->getLE<uint32_t>();
+            break;
         case sizeof(uint16_t):
-        data = pkt->getLE<uint16_t>();
-        break;
+            data = pkt->getLE<uint16_t>();
+            break;
         case sizeof(uint8_t):
-        data = pkt->getLE<uint8_t>();
-        break;
+            data = pkt->getLE<uint8_t>();
+            break;
     }
     DPRINTF(Vortex, "write() %x, %x\n", addr, data);
 
-    sim->write_mmio64(0, addr, data);
+    sim->write_mmio64(0, addr, data, size);
     //sim->write_mmio64(0, addr, *data);
 
     // example write
     pkt->makeAtomicResponse();
 
     // obtained from start() of vortex.cpp for opae
-    if (addr - pioAddr == 40 && data == 3) {
+    if (addr == 40 && data == 3) {
         vortex_start();
     }
 
@@ -124,7 +141,7 @@ Tick Vortex::write(PacketPtr pkt)
 
 AddrRangeList Vortex::getAddrRanges() const
 {
-    return AddrRangeList({ RangeSize(pioAddr, pioAddr + 0xFFFF) });
+    return AddrRangeList({ RangeSize(pioAddr, pioAddr + 0x8000FFFF) });
 }
 
 int Vortex::vortex_start() {

@@ -52,9 +52,6 @@ Checking for linker -Wno-free-nonheap-object support... (cached) yes
 scons: done reading SConscript files.
 scons: Building targets ...
  [VER TAGS]  -> ARM/sim/tags.cc
- [MAKE INC] src/mem/ruby/structures/PerfectCacheMemory.hh -> ARM/mem/ruby/protocol/PerfectCacheMemory.hh
- [MAKE INC] src/mem/ruby/structures/RubyPrefetcherProxy.hh -> ARM/mem/ruby/protocol/RubyPrefetcherProxy.hh
- [MAKE INC] src/mem/ruby/structures/TBETable.hh -> ARM/mem/ruby/protocol/TBETable.hh
  [     CXX] src/vortex-gpu/vortex_gpu.cc -> ARM/vortex-gpu/vortex_gpu.o
  [     CXX] src/base/date.cc -> ARM/base/date.o
  [    LINK]  -> ARM/gem5.opt

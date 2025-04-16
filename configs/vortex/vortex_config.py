@@ -8,8 +8,8 @@ system.clk_domain.clock = '1GHz'
 system.clk_domain.voltage_domain = VoltageDomain()
 
 system.mem_mode = 'timing'
-system.mem_ranges = [AddrRange('2048MB'), 
-                    AddrRange(Addr("2048MB"), size="8192MB")]
+system.mem_ranges = [AddrRange('512MB'), 
+                    AddrRange(Addr("512MB"), size="8192MB")]
 #system.mem_ranges = [AddrRange('512MB')]
 
 system.cpu = ArmTimingSimpleCPU()
@@ -26,13 +26,13 @@ system.cpu.createInterruptController()
 
 system.system_port = system.membus.cpu_side_ports
 
-system.mem_ctrl = MemCtrl()
-system.mem_ctrl.dram = DDR3_1600_8x8()
-system.mem_ctrl.dram.range = system.mem_ranges[0]
-system.mem_ctrl.port = system.membus.mem_side_ports
+system.mem_ctrl0 = MemCtrl()
+system.mem_ctrl0.dram = DDR3_1600_8x8()
+system.mem_ctrl0.dram.range = system.mem_ranges[0]
+system.mem_ctrl0.port = system.membus.mem_side_ports
 
 system.gpu = Vortex(
-    pio_addr=0x80000000,
+    pio_addr=0x20000000,
     int_gpu=1,
     num_clusters=1,
     num_cores=1,
@@ -65,7 +65,7 @@ m5.instantiate()
 #)
 
 system.cpu.workload[0].map(
-    0x80000000, 0x80000000, 0xFFFF
+    0x20000000, 0x20000000, 0x8000FFFF
 )
 
 print("Beginning simulation!")

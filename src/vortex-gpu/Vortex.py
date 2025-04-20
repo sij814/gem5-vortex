@@ -1,7 +1,7 @@
-from m5.objects.Device import PioDevice
+from m5.objects.Device import DmaDevice
 from m5.params import *
 
-class Vortex(PioDevice):
+class Vortex(DmaDevice):
     type = 'Vortex'
     cxx_class = 'gem5::Vortex'
     cxx_header = "vortex-gpu/vortex_gpu.hh"

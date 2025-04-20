@@ -24,7 +24,7 @@ namespace gem5
 {
 
 Vortex::Vortex(const VortexParams &p)
-    : PioDevice(p),
+    : DmaDevice(p),
     pioAddr(p.pio_addr),
     intGpu(p.int_gpu),
     numClusters(p.num_clusters),
@@ -44,7 +44,7 @@ Vortex::init()
 {
     DPRINTF(Vortex, "Vortex Initialized\n");
 
-    PioDevice::init();
+    DmaDevice::init();
     sim->init();
     schedule(tickEvent, 0);
 }
@@ -54,9 +54,14 @@ void Vortex::processTick()
     if (curTick() % 100000000 == 0) {
         DPRINTF(Vortex, "Vortex tick = %d\n", SimPlatform::instance().cycles());
     }
-
     // simulate Gem5 tick
-    schedule(tickEvent, curTick() + 1);
+    schedule(tickEvent, curTick() + 5);
+    if (sim->get_running()) {
+        sim->proc_tick();
+        if (curTick() % 10000 == 0) {
+            DPRINTF(Vortex, "running Vortex tick = %d\n", SimPlatform::instance().cycles());
+        }
+    }
 }
 
 void Vortex::serialize(CheckpointOut &cp) const

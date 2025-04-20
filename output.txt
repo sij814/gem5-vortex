@@ -5,9 +5,9 @@ gem5 Simulator System.  https://www.gem5.org
 gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 version 24.1.0.2
-gem5 compiled Apr 16 2025 16:27:04
-gem5 started Apr 16 2025 16:31:33
-gem5 executing on DESKTOP-O14TLKV, pid 184831
+gem5 compiled Apr 17 2025 23:27:49
+gem5 started Apr 18 2025 12:55:51
+gem5 executing on DESKTOP-O14TLKV, pid 1177088
 command line: build/ARM/gem5.opt --debug-flags=Vortex configs/vortex/vortex_config.py
 
 Beginning simulation!
@@ -4047,18 +4047,74 @@ bin file detected
 6504428000: system.gpu: write() 28, 3
 6504428000: system.gpu: vortex start()
 6504428000: system.gpu: running = 0
+6504430000: system.gpu: running Vortex tick = 400
+6504440000: system.gpu: running Vortex tick = 2400
+6504450000: system.gpu: running Vortex tick = 4400
+6504460000: system.gpu: running Vortex tick = 6400
+6504470000: system.gpu: running Vortex tick = 8400
+6504480000: system.gpu: running Vortex tick = 10400
+6504490000: system.gpu: running Vortex tick = 12400
 #0: Global Memory Test
+6504500000: system.gpu: running Vortex tick = 14400
+6504510000: system.gpu: running Vortex tick = 16400
+6504520000: system.gpu: running Vortex tick = 18400
 #0: Local Memory Test
+6504530000: system.gpu: running Vortex tick = 20400
+6504540000: system.gpu: running Vortex tick = 22400
 #0: TMC Test
+6504550000: system.gpu: running Vortex tick = 24400
+6504560000: system.gpu: running Vortex tick = 26400
 #0: PRED Test
+6504570000: system.gpu: running Vortex tick = 28400
+6504580000: system.gpu: running Vortex tick = 30400
+6504590000: system.gpu: running Vortex tick = 32400
 #0: Control Divergence Test
+6504600000: system.gpu: running Vortex tick = 34400
+6504610000: system.gpu: running Vortex tick = 36400
+6504620000: system.gpu: running Vortex tick = 38400
 #0: Wspawn Test
+6504630000: system.gpu: running Vortex tick = 40400
+6504640000: system.gpu: running Vortex tick = 42400
+6504650000: system.gpu: running Vortex tick = 44400
 #0: SpawnTasks Test
+6504660000: system.gpu: running Vortex tick = 46400
+6504670000: system.gpu: running Vortex tick = 48400
+6504680000: system.gpu: running Vortex tick = 50400
 #0: Serial Test
+6504690000: system.gpu: running Vortex tick = 52400
+6504700000: system.gpu: running Vortex tick = 54400
+6504710000: system.gpu: running Vortex tick = 56400
+6504720000: system.gpu: running Vortex tick = 58400
 #0: Thread Mask Test
+6504730000: system.gpu: running Vortex tick = 60400
+6504740000: system.gpu: running Vortex tick = 62400
+6504750000: system.gpu: running Vortex tick = 64400
 #0: Barrier Test
+6504760000: system.gpu: running Vortex tick = 66400
+6504770000: system.gpu: running Vortex tick = 68400
+6504780000: system.gpu: running Vortex tick = 70400
+6504790000: system.gpu: running Vortex tick = 72400
+6504800000: system.gpu: running Vortex tick = 74400
+6504810000: system.gpu: running Vortex tick = 76400
+6504820000: system.gpu: running Vortex tick = 78400
+6504830000: system.gpu: running Vortex tick = 80400
+6504840000: system.gpu: running Vortex tick = 82400
+6504850000: system.gpu: running Vortex tick = 84400
+6504860000: system.gpu: running Vortex tick = 86400
+6504870000: system.gpu: running Vortex tick = 88400
+6504880000: system.gpu: running Vortex tick = 90400
+6504890000: system.gpu: running Vortex tick = 92400
+6504900000: system.gpu: running Vortex tick = 94400
+6504910000: system.gpu: running Vortex tick = 96400
+6504920000: system.gpu: running Vortex tick = 98400
+6504930000: system.gpu: running Vortex tick = 100400
+6504940000: system.gpu: running Vortex tick = 102400
+6504950000: system.gpu: running Vortex tick = 104400
+6504960000: system.gpu: running Vortex tick = 106400
 #0: TLS Test
+6504970000: system.gpu: running Vortex tick = 108400
+6504980000: system.gpu: running Vortex tick = 110400
 #0: Passed!
-Processor Done exitcode: 0
+6504990000: system.gpu: running Vortex tick = 112400
 6600000000: system.gpu: Vortex tick = 113948
 Exiting @ tick 6606100000 because exiting with last active thread context

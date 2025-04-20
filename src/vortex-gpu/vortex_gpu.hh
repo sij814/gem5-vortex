@@ -10,13 +10,14 @@
 #include "vortex/runtime/include/vortex.h"
 #include "vortex/build/hw/VX_config.h"
 #include "opae_simx.h"
+#include "dev/dma_device.hh"
 //#include "opae_sim.h"
 
 namespace gem5
 {
 struct VortexParams;
 
-class Vortex : public PioDevice
+class Vortex : public DmaDevice
 {
     public:
         Vortex(const VortexParams &p);

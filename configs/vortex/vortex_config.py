@@ -41,6 +41,7 @@ system.gpu = Vortex(
 )
 
 system.gpu.pio = system.membus.mem_side_ports
+system.gpu.dma = system.membus.cpu_side_ports
 
 #binary = 'tests/test-progs/hello/bin/arm/linux/hello'
 #binary = 'tests/test-progs/hello/bin/x86/linux/hello'

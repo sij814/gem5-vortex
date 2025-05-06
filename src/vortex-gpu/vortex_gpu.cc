@@ -31,8 +31,12 @@ Vortex::Vortex(const VortexParams &p)
     numCores(p.num_cores),
     numWarps(p.num_warps),
     numThreads(p.num_threads),
+    ram(p.vortex_ram),
     running(0),
-    tickEvent([this]{processTick();}, name())
+    status(0),
+    tickEvent([this]{ processTick(); }, name()),
+    dmaEvent([this]{ dmaEventDone(); }, name()),
+    startEvent([this]{ vortex_start(); }, name())
 {
     DPRINTF(Vortex, "Creating Vortex\n");
 
@@ -46,16 +50,17 @@ Vortex::init()
 
     DmaDevice::init();
     sim->init();
+    ram->init();
     schedule(tickEvent, 0);
 }
 
 void Vortex::processTick() 
 {
-    if (curTick() % 100000000 == 0) {
-        DPRINTF(Vortex, "Vortex tick = %d\n", SimPlatform::instance().cycles());
+    if (curTick() % 1000000000 == 0) {
+        DPRINTF(Vortex, "Vortex tick = %d running = %d\n", SimPlatform::instance().cycles(), sim->get_running());
     }
     // simulate Gem5 tick
-    schedule(tickEvent, curTick() + 5);
+    schedule(tickEvent, curTick() + 10);
     if (sim->get_running()) {
         sim->proc_tick();
         if (curTick() % 10000 == 0) {
@@ -80,7 +85,18 @@ Tick Vortex::read(PacketPtr pkt)
 
     uint64_t data;
     uint64_t size = pkt->getSize();
-    sim->read_mmio64(0, addr, &data, size);
+
+    if (addr == 0x14) {
+        pkt->setLE<uint32_t>(status);
+        pkt->makeResponse();
+        return 0;
+    }
+
+    if (addr >= STARTUP_ADDR) {
+        sim->read_mmio64(0, addr, &data, size);
+    } else {
+        data = buffer[addr];
+    }
 
     switch (size) {
         case sizeof(uint64_t):
@@ -130,23 +146,45 @@ Tick Vortex::write(PacketPtr pkt)
     }
     DPRINTF(Vortex, "write() %x, %x\n", addr, data);
 
-    sim->write_mmio64(0, addr, data, size);
-    //sim->write_mmio64(0, addr, *data);
+    if (addr >= STARTUP_ADDR) {
+        sim->write_mmio64(0, addr, data, size);
+    } else {
+        buffer[addr] = data;
+        
+        switch (addr) {
+            case 0x10: {
+                status = 0;
+                const Addr srcAddr(buffer[0x4]);
+                //uint8_t* destAddr = (uint8_t*)buffer[0x8];
+                //const Addr destAddr(buffer[0x8]);
+                //uint8_t* host_addr = ram->toHostAddr(destAddr);
+                uint32_t size = buffer[0xc];
+                dmaBuffer.resize(size);
+
+                DPRINTF(Vortex, "dmaRead srcAddr=%x, destAddr=%x, size=%ld\n", srcAddr, buffer[0x8], size);
+
+                dmaRead(srcAddr, size, &dmaEvent, dmaBuffer.data(), 0);
+                break;
+            } case 0x28: {
+                switch (data) {
+                    case 3:
+                        vortex_start();
+                        break;
+                }
+                break;
+            }
+        }
+    }
 
     // example write
     pkt->makeAtomicResponse();
-
-    // obtained from start() of vortex.cpp for opae
-    if (addr == 40 && data == 3) {
-        vortex_start();
-    }
 
     return 0;
 }
 
 AddrRangeList Vortex::getAddrRanges() const
 {
-    return AddrRangeList({ RangeSize(pioAddr, pioAddr + 0x8000FFFF) });
+    return AddrRangeList({ RangeSize(pioAddr, pioAddr + 0xFFFFFF) });
 }
 
 int Vortex::vortex_start() {
@@ -159,22 +197,14 @@ int Vortex::vortex_start() {
     return 0;
 }
 
-int Vortex::vortex_read(vx_device_h hdevice, uint32_t addr, uint32_t* value) 
+void
+Vortex::dmaEventDone()
 {
-    DPRINTF(Vortex, "vortex read()\n");
+    const Addr destAddr(buffer[0x8]);
+    DPRINTF(Vortex, "DMA Done\n");
 
-    vx_dcr_read(hdevice, addr, value);
-
-    return 0;
-}
-
-int Vortex::vortex_write(vx_device_h hdevice, uint32_t addr, uint32_t value) 
-{
-    DPRINTF(Vortex, "vortex write() %x\n", addr);
-
-    vx_dcr_write(hdevice, addr, value);
-
-    return 0;
+    sim->write_mem((void*)dmaBuffer.data(), destAddr - pioAddr, dmaBuffer.size());
+    status = 1;
 }
 
 } // namespace gem5

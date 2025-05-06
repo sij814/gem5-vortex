@@ -1,6 +1,8 @@
 #ifndef __VORTEX_GPU_VORTEX_GPU_HH__
 #define __VORTEX_GPU_VORTEX_GPU_HH__
 
+#include <vector>
+
 #include "dev/io_device.hh"
 #include "params/Vortex.hh"
 #include "sim/eventq.hh"
@@ -11,7 +13,7 @@
 #include "vortex/build/hw/VX_config.h"
 #include "opae_simx.h"
 #include "dev/dma_device.hh"
-//#include "opae_sim.h"
+#include "mem/simple_mem.hh"
 
 namespace gem5
 {
@@ -37,14 +39,15 @@ class Vortex : public DmaDevice
 
     private:
         EventFunctionWrapper tickEvent;
+        EventFunctionWrapper dmaEvent;
+        EventFunctionWrapper startEvent;
 
         void processTick();
 
     // Put wrapper functions here
     protected:
         int vortex_start();
-        int vortex_read(vx_device_h hdevice, uint32_t addr, uint32_t* value);
-        int vortex_write(vx_device_h hdevice, uint32_t addr, uint32_t value);
+        void dmaEventDone();
     /*
     private:
         void setCallback(const_vortex_t &callback);
@@ -60,9 +63,14 @@ class Vortex : public DmaDevice
         const uint32_t numThreads;
 
         vortex::opae_simx* sim;
+
+        std::vector<uint8_t> dmaBuffer;
     
     private:
         uint32_t running;
+        uint32_t buffer[128];
+        gem5::memory::SimpleMemory *ram;
+        uint32_t status;
 };
 
 } // namespace gem5

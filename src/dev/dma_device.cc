@@ -286,7 +286,7 @@ DmaPort::trySendTimingReq()
             device->schedule(sendEvent, device->clockEdge(Cycles(1)));
         }
     } else {
-        DPRINTF(DMA, "-- Failed, waiting for retry\n");
+        DPRINTF(DMA, "-- Failed, waiting for retry transmitList: %d\n", transmitList.size());
     }
 
     DPRINTF(DMA, "TransmitList: %d, retryPending: %d\n",

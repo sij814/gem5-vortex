@@ -13,3 +13,5 @@ class Vortex(DmaDevice):
     num_warps = Param.UInt32("Device number of warps")
     num_threads = Param.UInt32("Device number of threads")
 
+    vortex_ram = Param.SimpleMemory("scratchpad backing store")
+

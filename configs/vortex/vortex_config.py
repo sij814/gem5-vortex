@@ -9,7 +9,8 @@ system.clk_domain.voltage_domain = VoltageDomain()
 
 system.mem_mode = 'timing'
 system.mem_ranges = [AddrRange('512MB'), 
-                    AddrRange(Addr("512MB"), size="8192MB")]
+                    AddrRange(Addr("512MB"), size="512MB"),
+                    AddrRange(Addr(0xa0000000), size="512MB")]
 #system.mem_ranges = [AddrRange('512MB')]
 
 system.cpu = ArmTimingSimpleCPU()
@@ -38,6 +39,9 @@ system.gpu = Vortex(
     num_cores=1,
     num_warps=4,
     num_threads=1,
+    vortex_ram=SimpleMemory(
+        range=system.mem_ranges[2],
+        port=system.membus.mem_side_ports),
 )
 
 system.gpu.pio = system.membus.mem_side_ports
@@ -61,12 +65,16 @@ system.cpu.createThreads()
 root = Root(full_system=False, system=system)
 
 m5.instantiate()
-#system.cpu.workload[0].map(
-#    0x00000000, 0x00000000, 0xFFFF
-#)
+system.cpu.workload[0].map(
+    0x10000000, 0x10000000, 0xFFFFFF
+)
 
 system.cpu.workload[0].map(
-    0x20000000, 0x20000000, 0x8000FFFF
+    0x20000000, 0x20000000, 0xFFFF
+)
+
+system.cpu.workload[0].map(
+    0xa0000000, 0xa0000000, 0xFFFF
 )
 
 print("Beginning simulation!")

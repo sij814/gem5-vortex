@@ -6,8 +6,8 @@ gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 version 24.1.0.2
 gem5 compiled May  8 2025 15:41:01
-gem5 started May  8 2025 15:47:25
-gem5 executing on DESKTOP-O14TLKV, pid 63845
+gem5 started May  8 2025 22:29:57
+gem5 executing on DESKTOP-O14TLKV, pid 142266
 command line: build/ARM/gem5.opt --debug-flags=Vortex configs/vortex/vortex_config.py
 
 Beginning simulation!

@@ -39,7 +39,8 @@ class Vortex : public DmaDevice
 
     private:
         EventFunctionWrapper tickEvent;
-        EventFunctionWrapper dmaEvent;
+        EventFunctionWrapper dmaReadEvent;
+        EventFunctionWrapper dmaWriteEvent;
         EventFunctionWrapper startEvent;
 
         void processTick();
@@ -47,7 +48,8 @@ class Vortex : public DmaDevice
     // Put wrapper functions here
     protected:
         int vortex_start();
-        void dmaEventDone();
+        void dmaReadEventDone();
+        void dmaWriteEventDone();
     /*
     private:
         void setCallback(const_vortex_t &callback);
@@ -68,7 +70,7 @@ class Vortex : public DmaDevice
     
     private:
         uint32_t running;
-        uint32_t buffer[128];
+        uint32_t registers[128];
         gem5::memory::SimpleMemory *ram;
         uint32_t status;
 };

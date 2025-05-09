@@ -70,11 +70,11 @@ system.cpu.workload[0].map(
 )
 
 system.cpu.workload[0].map(
-    0x20000000, 0x20000000, 0xFFFF
+    0x20000000, 0x20000000, 0xFFFFFF
 )
 
 system.cpu.workload[0].map(
-    0xa0000000, 0xa0000000, 0xFFFF
+    0xa0000000, 0xa0000000, 0xFFFFFF
 )
 
 print("Beginning simulation!")

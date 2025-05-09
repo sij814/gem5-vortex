@@ -35,7 +35,8 @@ Vortex::Vortex(const VortexParams &p)
     running(0),
     status(0),
     tickEvent([this]{ processTick(); }, name()),
-    dmaEvent([this]{ dmaEventDone(); }, name()),
+    dmaReadEvent([this]{ dmaReadEventDone(); }, name()),
+    dmaWriteEvent([this]{ dmaWriteEventDone(); }, name()),
     startEvent([this]{ vortex_start(); }, name())
 {
     DPRINTF(Vortex, "Creating Vortex\n");
@@ -56,6 +57,8 @@ Vortex::init()
 
 void Vortex::processTick() 
 {
+    running = sim->get_running();
+    
     if (curTick() % 1000000000 == 0) {
         DPRINTF(Vortex, "Vortex tick = %d running = %d\n", SimPlatform::instance().cycles(), sim->get_running());
     }
@@ -91,11 +94,17 @@ Tick Vortex::read(PacketPtr pkt)
         pkt->makeResponse();
         return 0;
     }
+    
+    if (addr == 0x18) {
+        pkt->setLE<uint32_t>(running);
+        pkt->makeResponse();
+        return 0;
+    }
 
     if (addr >= STARTUP_ADDR) {
         sim->read_mmio64(0, addr, &data, size);
     } else {
-        data = buffer[addr];
+        data = registers[addr];
     }
 
     switch (size) {
@@ -113,12 +122,7 @@ Tick Vortex::read(PacketPtr pkt)
             break;
     }
 
-    // example read
     pkt->makeResponse();
-
-    //if (addr == 40 && ((data & 3) == 3)) {
-    //    vortex_start();
-    //}
 
     DPRINTF(Vortex, "read() done for %x\n", addr);
 
@@ -149,21 +153,25 @@ Tick Vortex::write(PacketPtr pkt)
     if (addr >= STARTUP_ADDR) {
         sim->write_mmio64(0, addr, data, size);
     } else {
-        buffer[addr] = data;
+        registers[addr] = data;
         
         switch (addr) {
             case 0x10: {
                 status = 0;
-                const Addr srcAddr(buffer[0x4]);
-                //uint8_t* destAddr = (uint8_t*)buffer[0x8];
-                //const Addr destAddr(buffer[0x8]);
-                //uint8_t* host_addr = ram->toHostAddr(destAddr);
-                uint32_t size = buffer[0xc];
+                const Addr srcAddr(registers[0x4]);
+                const Addr destAddr(registers[0x8]);
+                uint32_t size = registers[0xc];
+
                 dmaBuffer.resize(size);
 
-                DPRINTF(Vortex, "dmaRead srcAddr=%x, destAddr=%x, size=%ld\n", srcAddr, buffer[0x8], size);
-
-                dmaRead(srcAddr, size, &dmaEvent, dmaBuffer.data(), 0);
+                if (data == 1) {
+                    DPRINTF(Vortex, "dmaRead srcAddr=%x, destAddr=%x, size=%ld\n", srcAddr, destAddr, size);
+                    dmaRead(srcAddr, size, &dmaReadEvent, dmaBuffer.data(), 0);
+                } else {
+                    sim->read_mem((void*)dmaBuffer.data(), srcAddr, dmaBuffer.size());
+                    DPRINTF(Vortex, "dmaWrite srcAddr=%x, destAddr=%x, size=%ld\n", srcAddr, destAddr, size);
+                    dmaWrite(destAddr, size, &dmaWriteEvent, dmaBuffer.data(), 0);
+                }
                 break;
             } case 0x28: {
                 switch (data) {
@@ -190,7 +198,7 @@ AddrRangeList Vortex::getAddrRanges() const
 int Vortex::vortex_start() {
     DPRINTF(Vortex, "vortex start()\n");
 
-    sim->start();
+    sim->start(registers[0x1c], registers[0x20]);
 
     DPRINTF(Vortex, "running = %d\n", running);
 
@@ -198,12 +206,20 @@ int Vortex::vortex_start() {
 }
 
 void
-Vortex::dmaEventDone()
+Vortex::dmaReadEventDone()
 {
-    const Addr destAddr(buffer[0x8]);
-    DPRINTF(Vortex, "DMA Done\n");
+    const Addr destAddr(registers[0x8]);
+    DPRINTF(Vortex, "DMA Read Done\n");
 
-    sim->write_mem((void*)dmaBuffer.data(), destAddr - pioAddr, dmaBuffer.size());
+    sim->write_mem((void*)dmaBuffer.data(), destAddr, dmaBuffer.size());
+    status = 1;
+}
+
+void
+Vortex::dmaWriteEventDone()
+{
+    const Addr destAddr(registers[0x8]);
+    DPRINTF(Vortex, "DMA Write Done\n");
     status = 1;
 }
 

@@ -110,7 +110,7 @@ int main()
     uint32_t kernel_arg_addr = kernel_addr + 0x100000;
 
     // read program kernel in
-    const char* program = "/home/sij814/gem5-vortex/ext/vortex/build/tests/regression/vecaddx/kernel.vxbin";
+    const char* program = "/home/sij814/gem5-vortex/tests/test-progs/vortex-test/kernel.vxbin";
     //const char* program = "/home/sij814/gem5-vortex/ext/vortex/build/tests/kernel/hello/hello.bin";
     std::string program_ext(fileExtension(program));
 

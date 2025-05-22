@@ -9,11 +9,11 @@
 #include "sim/system.hh"
 #include "enums/MemoryMode.hh"
 #include "mem/packet_access.hh"
-#include "vortex/runtime/include/vortex.h"
 #include "vortex/build/hw/VX_config.h"
-#include "opae_simx.h"
+#include "simx_device.h"
 #include "dev/dma_device.hh"
 #include "mem/simple_mem.hh"
+#include "vortex/build/runtime/vortex_afu.h"
 
 namespace gem5
 {
@@ -64,13 +64,14 @@ class Vortex : public DmaDevice
         const uint32_t numWarps;
         const uint32_t numThreads;
 
-        vortex::opae_simx* sim;
+        vortex::simx_device* sim;
 
         std::vector<uint8_t> dmaBuffer;
     
     private:
+        uint32_t initStatus;
         uint32_t running;
-        uint32_t registers[128];
+        uint64_t MMIORegisters[128] = { };
         gem5::memory::SimpleMemory *ram;
         uint32_t status;
 };

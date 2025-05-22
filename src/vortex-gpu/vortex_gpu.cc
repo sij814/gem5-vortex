@@ -10,15 +10,28 @@
 #include "core.h"
 #include "VX_types.h"
 #include "VX_config.h"
-#include "opae_simx.h"
-//#include "opae_sim.h"
+#include "simx_device.h"
 
 ///////////////////////
 #include <iostream>
 #include <unistd.h>
 #include <string.h>
 #include <vector>
-#include "vortex/runtime/common/common.h"
+
+#define CMD_MEM_READ     AFU_IMAGE_CMD_MEM_READ
+#define CMD_MEM_WRITE    AFU_IMAGE_CMD_MEM_WRITE
+#define CMD_RUN          AFU_IMAGE_CMD_RUN
+#define CMD_DCR_WRITE    AFU_IMAGE_CMD_DCR_WRITE
+
+#define MMIO_CMD_TYPE    (AFU_IMAGE_MMIO_CMD_TYPE * 4)
+#define MMIO_CMD_ARG0    (AFU_IMAGE_MMIO_CMD_ARG0 * 4)
+#define MMIO_CMD_ARG1    (AFU_IMAGE_MMIO_CMD_ARG1 * 4)
+#define MMIO_CMD_ARG2    (AFU_IMAGE_MMIO_CMD_ARG2 * 4)
+#define MMIO_STATUS      (AFU_IMAGE_MMIO_STATUS * 4)
+#define MMIO_DEV_CAPS    (AFU_IMAGE_MMIO_DEV_CAPS * 4)
+#define MMIO_ISA_CAPS    (AFU_IMAGE_MMIO_ISA_CAPS * 4)
+#define MMIO_SCOPE_READ  (AFU_IMAGE_MMIO_SCOPE_READ * 4)
+#define MMIO_SCOPE_WRITE (AFU_IMAGE_MMIO_SCOPE_WRITE * 4)
 
 namespace gem5
 {
@@ -32,6 +45,7 @@ Vortex::Vortex(const VortexParams &p)
     numWarps(p.num_warps),
     numThreads(p.num_threads),
     ram(p.vortex_ram),
+    initStatus(0),
     running(0),
     status(0),
     tickEvent([this]{ processTick(); }, name()),
@@ -41,7 +55,7 @@ Vortex::Vortex(const VortexParams &p)
 {
     DPRINTF(Vortex, "Creating Vortex\n");
 
-    sim = new vortex::opae_simx();
+    sim = new vortex::simx_device();
 }
 
 void
@@ -51,23 +65,27 @@ Vortex::init()
 
     DmaDevice::init();
     sim->init();
-    ram->init();
+    //ram->init();
     schedule(tickEvent, 0);
 }
 
 void Vortex::processTick() 
-{
-    running = sim->get_running();
-    
+{        
     if (curTick() % 1000000000 == 0) {
         DPRINTF(Vortex, "Vortex tick = %d running = %d\n", SimPlatform::instance().cycles(), sim->get_running());
     }
     // simulate Gem5 tick
     schedule(tickEvent, curTick() + 10);
+
     if (sim->get_running()) {
         sim->proc_tick();
         if (curTick() % 10000 == 0) {
             DPRINTF(Vortex, "running Vortex tick = %d\n", SimPlatform::instance().cycles());
+        }
+    } else {
+        if (running) {
+            MMIORegisters[MMIO_STATUS] = 0;
+            running = 0;
         }
     }
 }
@@ -86,26 +104,8 @@ Tick Vortex::read(PacketPtr pkt)
 
     DPRINTF(Vortex, "read() %x\n", addr);
 
-    uint64_t data;
+    uint64_t data = MMIORegisters[addr];
     uint64_t size = pkt->getSize();
-
-    if (addr == 0x14) {
-        pkt->setLE<uint32_t>(status);
-        pkt->makeResponse();
-        return 0;
-    }
-    
-    if (addr == 0x18) {
-        pkt->setLE<uint32_t>(running);
-        pkt->makeResponse();
-        return 0;
-    }
-
-    if (addr >= STARTUP_ADDR) {
-        sim->read_mmio64(0, addr, &data, size);
-    } else {
-        data = registers[addr];
-    }
 
     switch (size) {
         case sizeof(uint64_t):
@@ -124,7 +124,7 @@ Tick Vortex::read(PacketPtr pkt)
 
     pkt->makeResponse();
 
-    DPRINTF(Vortex, "read() done for %x\n", addr);
+    DPRINTF(Vortex, "read() done for %x data %x\n", addr, data);
 
     return 0;
 }
@@ -150,41 +150,45 @@ Tick Vortex::write(PacketPtr pkt)
     }
     DPRINTF(Vortex, "write() %x, %x\n", addr, data);
 
-    if (addr >= STARTUP_ADDR) {
-        sim->write_mmio64(0, addr, data, size);
-    } else {
-        registers[addr] = data;
-        
-        switch (addr) {
-            case 0x10: {
+    MMIORegisters[addr] = data;
+    
+    if (addr == MMIO_CMD_TYPE) {
+        switch (data) {
+            case CMD_MEM_READ: 
+            case CMD_MEM_WRITE: {
                 status = 0;
-                const Addr srcAddr(registers[0x4]);
-                const Addr destAddr(registers[0x8]);
-                uint32_t size = registers[0xc];
+                const Addr stagingAddr(MMIORegisters[MMIO_CMD_ARG0]);
+                const Addr deviceAddr(MMIORegisters[MMIO_CMD_ARG1]);
+                uint64_t size = MMIORegisters[MMIO_CMD_ARG2];
 
                 dmaBuffer.resize(size);
 
-                if (data == 1) {
-                    DPRINTF(Vortex, "dmaRead srcAddr=%x, destAddr=%x, size=%ld\n", srcAddr, destAddr, size);
-                    dmaRead(srcAddr, size, &dmaReadEvent, dmaBuffer.data(), 0);
+                if (data == CMD_MEM_WRITE) {
+                    DPRINTF(Vortex, "dmaRead stagingAddr=%x, deviceAddr=%x, size=%ld\n", stagingAddr, deviceAddr, size);
+                    dmaRead(stagingAddr, size, &dmaReadEvent, dmaBuffer.data(), 0);
                 } else {
-                    sim->read_mem((void*)dmaBuffer.data(), srcAddr, dmaBuffer.size());
-                    DPRINTF(Vortex, "dmaWrite srcAddr=%x, destAddr=%x, size=%ld\n", srcAddr, destAddr, size);
-                    dmaWrite(destAddr, size, &dmaWriteEvent, dmaBuffer.data(), 0);
+                    sim->read_mem((void*)dmaBuffer.data(), deviceAddr, dmaBuffer.size());
+                    DPRINTF(Vortex, "dmaWrite stagingAddr=%x, deviceAddr=%x, size=%ld\n", stagingAddr, deviceAddr, size);
+                    dmaWrite(stagingAddr, size, &dmaWriteEvent, dmaBuffer.data(), 0);
                 }
+                MMIORegisters[MMIO_STATUS] = 1;
                 break;
-            } case 0x28: {
-                switch (data) {
-                    case 3:
-                        vortex_start();
-                        break;
-                }
+            } case CMD_RUN: {
+                MMIORegisters[MMIO_STATUS] = 1;
+                vortex_start();
+                break;
+            } case CMD_DCR_WRITE: {
+                uint32_t addr = (uint32_t)MMIORegisters[MMIO_CMD_ARG0];
+                uint32_t value = (uint32_t)MMIORegisters[MMIO_CMD_ARG1];
+                
+                DPRINTF(Vortex, "DCR Write addr=%d value=%d\n", addr, value);
+
+                sim->dcr_write(addr, value);
                 break;
             }
         }
     }
 
-    // example write
     pkt->makeAtomicResponse();
 
     return 0;
@@ -198,9 +202,9 @@ AddrRangeList Vortex::getAddrRanges() const
 int Vortex::vortex_start() {
     DPRINTF(Vortex, "vortex start()\n");
 
-    sim->start(registers[0x1c], registers[0x20]);
+    sim->start();
 
-    DPRINTF(Vortex, "running = %d\n", running);
+    running = 1;
 
     return 0;
 }
@@ -208,19 +212,19 @@ int Vortex::vortex_start() {
 void
 Vortex::dmaReadEventDone()
 {
-    const Addr destAddr(registers[0x8]);
+    const Addr deviceAddr(MMIORegisters[MMIO_CMD_ARG1]);
     DPRINTF(Vortex, "DMA Read Done\n");
 
-    sim->write_mem((void*)dmaBuffer.data(), destAddr, dmaBuffer.size());
-    status = 1;
+    sim->write_mem((void*)dmaBuffer.data(), deviceAddr, dmaBuffer.size());
+
+    MMIORegisters[MMIO_STATUS] = 0;
 }
 
 void
 Vortex::dmaWriteEventDone()
 {
-    const Addr destAddr(registers[0x8]);
     DPRINTF(Vortex, "DMA Write Done\n");
-    status = 1;
+    MMIORegisters[MMIO_STATUS] = 0;
 }
 
 } // namespace gem5

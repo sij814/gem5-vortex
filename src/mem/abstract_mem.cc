@@ -379,15 +379,11 @@ tracePacket(System *sys, const char *label, PacketPtr pkt)
 void
 AbstractMemory::access(PacketPtr pkt)
 {
-    DPRINTF(MemoryAccess, "HERE 1\n");
-
     if (pkt->cacheResponding()) {
         DPRINTF(MemoryAccess, "Cache responding to %#llx: not responding\n",
                 pkt->getAddr());
         return;
     }
-
-    DPRINTF(MemoryAccess, "HERE 2\n");
 
     if (pkt->cmd == MemCmd::CleanEvict || pkt->cmd == MemCmd::WritebackClean) {
         DPRINTF(MemoryAccess, "CleanEvict  on 0x%x: not responding\n",
@@ -395,25 +391,17 @@ AbstractMemory::access(PacketPtr pkt)
       return;
     }
 
-    DPRINTF(MemoryAccess, "HERE 3\n");
-
     assert(pkt->getAddrRange().isSubset(range));
 
     uint8_t *host_addr = toHostAddr(pkt->getAddr());
 
-    DPRINTF(MemoryAccess, "HERE 4 addr: %x pmem: %x range_start: %x range_end: %x host_addr: %x\n", pkt->getAddr(), (uint64_t)pmemAddr, range.start(), range.end(), (uint64_t)host_addr);
-
     if (pkt->cmd == MemCmd::SwapReq) {
-        DPRINTF(MemoryAccess, "HERE 5\n");
         if (pkt->isAtomicOp()) {
-            DPRINTF(MemoryAccess, "HERE 5.1\n");
             if (pmemAddr) {
-                DPRINTF(MemoryAccess, "HERE 5.1.1\n");
                 pkt->setData(host_addr);
                 (*(pkt->getAtomicOp()))(host_addr);
             }
         } else {
-            DPRINTF(MemoryAccess, "HERE 5.2\n");
             std::vector<uint8_t> overwrite_val(pkt->getSize());
             uint64_t condition_val64;
             uint32_t condition_val32;
@@ -450,23 +438,16 @@ AbstractMemory::access(PacketPtr pkt)
             }
         }
     } else if (pkt->isRead()) {
-        DPRINTF(MemoryAccess, "HERE 6\n");
         assert(!pkt->isWrite());
-        DPRINTF(MemoryAccess, "HERE 6.1\n");
         if (pkt->isLLSC()) {
-            DPRINTF(MemoryAccess, "HERE 6.2\n");
             assert(!pkt->fromCache());
             // if the packet is not coming from a cache then we have
             // to do the LL/SC tracking here
             trackLoadLocked(pkt);
         }
-        DPRINTF(MemoryAccess, "HERE 6.3\n");
         if (pmemAddr) {
-            DPRINTF(MemoryAccess, "HERE 6.3.1\n");
             pkt->setData(host_addr);
-            DPRINTF(MemoryAccess, "HERE 6.3.2 data=%d\n", pkt->getLE<uint8_t>());
         }
-        DPRINTF(MemoryAccess, "HERE 6.4\n");
         TRACE_PACKET(pkt->req->isInstFetch() ? "IFetch" : "Read");
         if (collectStats) {
             stats.numReads[pkt->req->requestorId()]++;
@@ -475,16 +456,13 @@ AbstractMemory::access(PacketPtr pkt)
                 stats.bytesInstRead[pkt->req->requestorId()] += pkt->getSize();
             }
         }
-        DPRINTF(MemoryAccess, "HERE 6.5\n");
     } else if (pkt->isInvalidate() || pkt->isClean()) {
-        DPRINTF(MemoryAccess, "HERE 7\n");
         assert(!pkt->isWrite());
         // in a fastmem system invalidating and/or cleaning packets
         // can be seen due to cache maintenance requests
 
         // no need to do anything
     } else if (pkt->isWrite()) {
-        DPRINTF(MemoryAccess, "HERE 8\n");
         if (writeOK(pkt)) {
             if (pmemAddr) {
                 pkt->writeData(host_addr);
@@ -499,15 +477,12 @@ AbstractMemory::access(PacketPtr pkt)
             }
         }
     } else {
-        DPRINTF(MemoryAccess, "HERE 9\n");
         panic("Unexpected packet %s", pkt->print());
     }
 
-    DPRINTF(MemoryAccess, "HERE 10\n");
     if (pkt->needsResponse()) {
         pkt->makeResponse();
     }
-    DPRINTF(MemoryAccess, "HERE 11\n");
 }
 
 void

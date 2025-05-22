@@ -47,18 +47,19 @@ system.gpu = Vortex(
 system.gpu.pio = system.membus.mem_side_ports
 system.gpu.dma = system.membus.cpu_side_ports
 
-#binary = 'tests/test-progs/hello/bin/arm/linux/hello'
-#binary = 'tests/test-progs/hello/bin/x86/linux/hello'
-#binary = 'tests/test-progs/vortex/a.out'
-#binary = 'tests/test-progs/vortex/nomali_test0'
-binary = 'tests/test-progs/vortex-test/vortex_arm32'
+
+binary = 'tests/test-progs/vortex-test/vecaddx/main_test'
+#binary = 'tests/test-progs/vortex-test/vortex_arm32'
 #binary = 'ext/vortex/build/tests/kernel/hello/hello.elf'
 
 # for gem5 V21 and beyond
 system.workload = SEWorkload.init_compatible(binary)
 
+#env = ["VORTEX_DRIVER=opaesimx"]
+
 process = Process()
 process.cmd = [binary]
+#process.env = env
 system.cpu.workload = process
 system.cpu.createThreads()
 

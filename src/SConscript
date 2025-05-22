@@ -552,12 +552,13 @@ vortex_path = os.path.join(Dir('#').abspath, 'ext/vortex/')
 print(vortex_path)
 
 env.Append(
-  LIBS=['vortex', 'simx', 'vortex-simx'],
+  LIBS=['simx', 'vortex-simx'],
   LIBPATH=[vortex_path+'build/runtime'],
   RPATH=[vortex_path+'build/runtime'],
   CPPPATH=[
   vortex_path+'sim/common', 
   vortex_path+'sim/simx',
+  vortex_path+'sim/opaesimx',
   vortex_path+'build/hw/',
   vortex_path+'runtime/include/',
   vortex_path+'runtime/common/'

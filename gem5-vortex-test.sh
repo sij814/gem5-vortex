@@ -1,0 +1,5 @@
+build/ARM/gem5.opt --outdir='vortex-test-results/conv3-stats' --debug-flags=Vortex configs/vortex/vortex_config.py --binary='tests/test-progs/vortex-test/conv3x/main_test' > vortex-test-results/outputs/output_conv3x.txt
+build/ARM/gem5.opt --outdir='vortex-test-results/diverge-stats' --debug-flags=Vortex configs/vortex/vortex_config.py --binary='tests/test-progs/vortex-test/diverge/main_test' > vortex-test-results/outputs/output_diverge.txt
+build/ARM/gem5.opt --outdir='vortex-test-results/sgemmx-stats' --debug-flags=Vortex configs/vortex/vortex_config.py --binary='tests/test-progs/vortex-test/sgemmx/main_test' > vortex-test-results/outputs/output_sgemmx.txt
+build/ARM/gem5.opt --outdir='vortex-test-results/sort-stats' --debug-flags=Vortex configs/vortex/vortex_config.py --binary='tests/test-progs/vortex-test/sort/main_test' > vortex-test-results/outputs/output_sort.txt
+build/ARM/gem5.opt --outdir='vortex-test-results/vecaddx-stats' --debug-flags=Vortex configs/vortex/vortex_config.py --binary='tests/test-progs/vortex-test/vecaddx/main_test' > vortex-test-results/outputs/output_vecaddx.txt

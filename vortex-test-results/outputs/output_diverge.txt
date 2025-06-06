@@ -1,0 +1,135 @@
+Global frequency set at 1000000000000 ticks per second
+      0: system.gpu: Creating Vortex
+      0: system.gpu: Vortex Initialized
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 24.1.0.2
+gem5 compiled Jun  5 2025 16:25:45
+gem5 started Jun  5 2025 16:41:55
+gem5 executing on DESKTOP-O14TLKV, pid 918380
+command line: build/ARM/gem5.opt --outdir=vortex-test-results/diverge-stats --debug-flags=Vortex configs/vortex/vortex_config.py --binary=tests/test-progs/vortex-test/diverge/main_test
+
+Beginning simulation!
+      0: system.gpu: Vortex tick = 0 running = 0
+open device connection
+341605000: system.gpu: read() 68
+341605000: system.gpu: read() done for 68 data 0
+342844000: system.gpu: read() 60
+342844000: system.gpu: read() done for 60 data 0
+344580000: system.gpu: write() 30, 1
+345473000: system.gpu: write() 38, 80000000
+346439000: system.gpu: write() 28, 4
+346439000: system.gpu: DCR Write addr=1 value=2147483648
+351848000: system.gpu: write() 30, 2
+352715000: system.gpu: write() 38, 0
+353588000: system.gpu: write() 28, 4
+353588000: system.gpu: DCR Write addr=2 value=0
+355708000: system.gpu: write() 30, 3
+356575000: system.gpu: write() 38, 0
+357448000: system.gpu: write() 28, 4
+357448000: system.gpu: DCR Write addr=3 value=0
+359653000: system.gpu: write() 30, 4
+360520000: system.gpu: write() 38, 0
+361393000: system.gpu: write() 28, 4
+361393000: system.gpu: DCR Write addr=4 value=0
+363441000: system.gpu: write() 30, 5
+364308000: system.gpu: write() 38, 0
+365181000: system.gpu: write() 28, 4
+365181000: system.gpu: DCR Write addr=5 value=0
+number of points: 128
+buffer size: 512 bytes
+allocate device memory
+dev_src=0x10000
+dev_dst=0x10200
+allocate host buffers
+upload source buffer
+440600000: system.gpu: read() 48
+440600000: system.gpu: read() done for 48 data 0
+507871000: system.gpu: write() 30, 10000000
+508792000: system.gpu: write() 38, 10000
+509659000: system.gpu: write() 40, 200
+510625000: system.gpu: write() 28, 2
+510625000: system.gpu: dmaRead stagingAddr=10000000, deviceAddr=10000, size=512
+510723000: system.gpu: DMA Read Done
+511688000: system.gpu: read() 48
+511688000: system.gpu: read() done for 48 data 0
+upload program
+628463000: system.gpu: read() 48
+628463000: system.gpu: read() done for 48 data 0
+1000000000: system.gpu: Vortex tick = 0 running = 0
+2000000000: system.gpu: Vortex tick = 0 running = 0
+2993234000: system.gpu: write() 30, 10000000
+2994203000: system.gpu: write() 38, 80000000
+2995070000: system.gpu: write() 40, 73c0
+2995943000: system.gpu: write() 28, 2
+2995943000: system.gpu: dmaRead stagingAddr=10000000, deviceAddr=80000000, size=29632
+2997105000: system.gpu: read() 48
+2997105000: system.gpu: read() done for 48 data 1
+2998074000: system.gpu: read() 48
+2998074000: system.gpu: read() done for 48 data 1
+2999043000: system.gpu: read() 48
+2999043000: system.gpu: read() done for 48 data 1
+2999190000: system.gpu: DMA Read Done
+3000000000: system.gpu: Vortex tick = 0 running = 0
+3000012000: system.gpu: read() 48
+3000012000: system.gpu: read() done for 48 data 0
+upload kernel argument
+3019528000: system.gpu: read() 48
+3019528000: system.gpu: read() done for 48 data 0
+3021219000: system.gpu: write() 30, 10000000
+3022092000: system.gpu: write() 38, 10400
+3022959000: system.gpu: write() 40, 40
+3023832000: system.gpu: write() 28, 2
+3023832000: system.gpu: dmaRead stagingAddr=10000000, deviceAddr=10400, size=64
+3023895000: system.gpu: DMA Read Done
+3024871000: system.gpu: read() 48
+3024871000: system.gpu: read() done for 48 data 0
+start device
+3031517000: system.gpu: write() 30, 1
+3032408000: system.gpu: write() 38, 80000000
+3033305000: system.gpu: write() 28, 4
+3033305000: system.gpu: DCR Write addr=1 value=2147483648
+3034634000: system.gpu: write() 30, 2
+3035501000: system.gpu: write() 38, 0
+3036374000: system.gpu: write() 28, 4
+3036374000: system.gpu: DCR Write addr=2 value=0
+3037470000: system.gpu: write() 30, 3
+3038337000: system.gpu: write() 38, 10400
+3039210000: system.gpu: write() 28, 4
+3039210000: system.gpu: DCR Write addr=3 value=66560
+3040308000: system.gpu: write() 30, 4
+3041175000: system.gpu: write() 38, 0
+3042048000: system.gpu: write() 28, 4
+3042048000: system.gpu: DCR Write addr=4 value=0
+3043084000: system.gpu: write() 28, 3
+3043084000: system.gpu: vortex start()
+3043100000: system.gpu: running Vortex tick = 1600
+3043200000: system.gpu: running Vortex tick = 11600
+3043300000: system.gpu: running Vortex tick = 21600
+3043400000: system.gpu: running Vortex tick = 31600
+3043500000: system.gpu: running Vortex tick = 41600
+3043600000: system.gpu: running Vortex tick = 51600
+3043700000: system.gpu: running Vortex tick = 61600
+3043800000: system.gpu: running Vortex tick = 71600
+3043900000: system.gpu: running Vortex tick = 81600
+3044000000: system.gpu: running Vortex tick = 91600
+wait for completion
+3046994000: system.gpu: read() 48
+3046994000: system.gpu: read() done for 48 data 0
+download destination buffer
+3051141000: system.gpu: read() 48
+3051141000: system.gpu: read() done for 48 data 0
+3052416000: system.gpu: write() 30, 10000000
+3053392000: system.gpu: write() 38, 10200
+3054263000: system.gpu: write() 40, 200
+3055136000: system.gpu: write() 28, 1
+3055136000: system.gpu: dmaWrite stagingAddr=10000000, deviceAddr=10200, size=512
+3055195000: system.gpu: DMA Write Done
+3056268000: system.gpu: read() 48
+3056268000: system.gpu: read() done for 48 data 0
+verify result
+cleanup
+PERF: instrs=0, cycles=0, IPC=0.000000
+PASSED!
+Exiting @ tick 3289674000 because exiting with last active thread context

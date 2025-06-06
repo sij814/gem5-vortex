@@ -79,7 +79,7 @@ void Vortex::processTick()
 
     if (sim->get_running()) {
         sim->proc_tick();
-        if (curTick() % 10000 == 0) {
+        if (curTick() % 100000 == 0) {
             DPRINTF(Vortex, "running Vortex tick = %d\n", SimPlatform::instance().cycles());
         }
     } else {

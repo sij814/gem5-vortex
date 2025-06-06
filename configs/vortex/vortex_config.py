@@ -1,6 +1,22 @@
 import m5
 from m5.objects import *
 
+m5.util.addToPath("../../")
+
+from caches import *
+
+thispath = os.path.dirname(os.path.realpath(__file__))
+default_binary = os.path.join(
+    thispath,
+    "../../",
+    'tests/test-progs/vortex-test/vecaddx/main_test',
+)
+
+# Binary to execute
+SimpleOpts.add_option("--binary", nargs="?", default=default_binary)
+
+args = SimpleOpts.parse_args()
+
 system = System()
 
 system.clk_domain = SrcClockDomain()
@@ -17,8 +33,30 @@ system.cpu = ArmTimingSimpleCPU()
 
 system.membus = SystemXBar()
 
-system.cpu.icache_port = system.membus.cpu_side_ports
-system.cpu.dcache_port = system.membus.cpu_side_ports
+# Create an L1 instruction and data cache
+system.cpu.icache = L1ICache(args)
+system.cpu.dcache = L1DCache(args)
+
+# Connect the instruction and data caches to the CPU
+system.cpu.icache.connectCPU(system.cpu)
+system.cpu.dcache.connectCPU(system.cpu)
+
+# Create a memory bus, a coherent crossbar, in this case
+system.l2bus = L2XBar()
+
+# Hook the CPU ports up to the l2bus
+system.cpu.icache.connectBus(system.l2bus)
+system.cpu.dcache.connectBus(system.l2bus)
+
+# Create an L2 cache and connect it to the l2bus
+system.l2cache = L2Cache(args)
+system.l2cache.connectCPUSideBus(system.l2bus)
+
+# Create a memory bus
+system.membus = SystemXBar()
+
+# Connect the L2 cache to the membus
+system.l2cache.connectMemSideBus(system.membus)
 
 system.cpu.createInterruptController()
 #system.cpu.interrupts[0].pio = system.membus.mem_side_ports
@@ -48,17 +86,18 @@ system.gpu.pio = system.membus.mem_side_ports
 system.gpu.dma = system.membus.cpu_side_ports
 
 
-binary = 'tests/test-progs/vortex-test/vecaddx/main_test'
-#binary = 'tests/test-progs/vortex-test/vortex_arm32'
-#binary = 'ext/vortex/build/tests/kernel/hello/hello.elf'
+#binary = 'tests/test-progs/vortex-test/conv3x/main_test'
+#binary = 'tests/test-progs/vortex-test/diverge/main_test'
+#binary = 'tests/test-progs/vortex-test/sgemmx/main_test'
+#binary = 'tests/test-progs/vortex-test/sort/main_test'
 
 # for gem5 V21 and beyond
-system.workload = SEWorkload.init_compatible(binary)
+system.workload = SEWorkload.init_compatible(args.binary)
 
 #env = ["VORTEX_DRIVER=opaesimx"]
 
 process = Process()
-process.cmd = [binary]
+process.cmd = [args.binary]
 #process.env = env
 system.cpu.workload = process
 system.cpu.createThreads()
